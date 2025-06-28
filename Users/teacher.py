@@ -1,4 +1,4 @@
-from user import User
+from Users.user import User
 
 class Teacher(User) :
     def __init__(self, name, email, Id, password, subject:str):
