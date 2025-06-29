@@ -2,36 +2,17 @@
 import json
 import re
 from Users.teacher import Teacher 
-import openai 
+from  openai import OpenAI
 import os 
 from dotenv import load_dotenv
 load_dotenv()
-openai.api_key= os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key= os.getenv("OPENAI_API_KEY"))
 
 
 
 users:list = []
-'''
-pip install openai
-from openai import OpenAI
-
-client = OpenAI(
-  api_key="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"
-)
-
-completion = client.chat.completions.create(
-  model="gpt-4o-mini",
-  store=True,
-  messages=[
-    {"role": "user", "content": "write a haiku about ai"}
-  ]
-)
-
-print(completion.choices[0].message);
-'''
-# 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
 user_dictionary = {}
-'''
+
 def read_file(email:str, password:str):
     with open("user.json", "r", encoding = "UTF-8") as file:
         content = file.read()
@@ -41,7 +22,7 @@ def read_file(email:str, password:str):
                 return True
              
         return False
-  '''     
+
 
 def write_file(users:list):
       with open("user.json", "w" ,encoding= "UTF-8") as file:
@@ -72,6 +53,8 @@ def check_Id(Id:int):
         else:
             return True
 
+
+
 def displayMenue_teacher():
     while True:
         print("Welcome")
@@ -98,19 +81,20 @@ def displayMenue_teacher():
                 break
             case _:
                 print("Wrong input try again!!!")
+
 def generate_questions(subject: str, num_questions: int = 5) -> list:
     prompt = (
         f"Generate {num_questions} multiple-choice quiz questions for {subject} "
         f". Provide 4 options (A, B, C, D) and indicate the correct answer."
     )
 
-    response =  client.ChatCompletion.create(
+    response =  client.chat.completions.create(
         model="gpt-4",  # or "gpt-3.5-turbo"
         messages=[{"role": "user", "content": prompt}],
         temperature=0.7
     )
 
-    content = response['choices'][0]['message']['content']
+    content = response.choices[0].message.content
     return content.split("\n\n")
 try:
         while True:
@@ -136,7 +120,7 @@ try:
                         if read_file(email,password):
                            displayMenue_teacher()
                         else:
-                            print("there no user in this email")
+                            print("there is no user in this email")
                         
 
                 elif login_choice == "2":
@@ -179,6 +163,26 @@ try:
                     print("Wrong input try again!!!")
 
             elif option == "2":
+                print("Welcome to Login Page")
+                print("[1]. Login")
+                print("[2]. Register")
+                login_choice = input("Please Enter What You Want: ")
+                if login_choice == "1":
+                    email = input("please enter your email: ")
+                    password = input("please enter your password: ")
+                    if check_email(email):
+                        if read_file(email,password):
+                           displayMenue_teacher()
+                        else:
+                            print("there is no user in this email")
+                        
+
+                elif login_choice == "2":
+                    print("Welcome to register Page")
+                    name = input("please enter your name: ")
+                    email = input ("please enter your email: ")
+                    Id = int(input("please enter your id: "))
+                    password = input("please enter your password: ")  
                 print("Welcome")
                 print("-"*20)
                 print("[1]. Take a Quiz")
