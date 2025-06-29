@@ -2,100 +2,48 @@
 import json
 import re
 from Users.teacher import Teacher 
-from  openai import OpenAI
-import os 
-from dotenv import load_dotenv
-load_dotenv()
-client = OpenAI(api_key= os.getenv("OPENAI_API_KEY"))
+from Users.students import Student 
+teachers:list = []
+teacher_dictionary = {}
 
+students:list = []
+student_dictionary = {}
 
+#####################################################################################################
 
-users:list = []
-user_dictionary = {}
-
-def read_file(email:str, password:str):
-    with open("user.json", "r", encoding = "UTF-8") as file:
+def read_file_teacher(email:str, password:str):
+    with open("teacher.json", "r", encoding = "UTF-8") as file:
         content = file.read()
-        users = json.loads(content)
-        for user in users:
-            if user['email'] == email and user['password'] == password:
+        teachers = json.loads(content)
+        for teacher in teachers:
+            if teacher['email'] == email and teacher['password'] == password:
+                return True
+             
+        return False
+    
+def read_file_student(email:str, password:str):
+    with open("student.json", "r", encoding = "UTF-8") as file:
+        content = file.read()
+        students = json.loads(content)
+        for student in students:
+            if student['email'] == email and student['password'] == password:
                 return True
              
         return False
 
 
-def write_file(users:list):
-      with open("user.json", "w" ,encoding= "UTF-8") as file:
-            
-            content = json.dumps(users, indent=2)
+def write_file_teacher(teachers:list):
+      with open("teacher.json", "w" ,encoding= "UTF-8") as file:
+            content = json.dumps(teachers, indent=2)
             file.write(content)
 
-def check_email(email:str):
-    valid = re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email)
-    if valid:
-        return True
-    else:
-        print("Invalid Email Address")
-        return False
 
-def check_password(password:str):
-    if len(password) >= 8:
-        return True
-    else:
-        print("Invalid Password Try again")
-        return False
+def write_file_student(teachers:list):
+      with open("student.json", "w" ,encoding= "UTF-8") as file:
+            content = json.dumps(students, indent=2)
+            file.write(content)
 
-def check_Id(Id:int):
-    if len(Id) == 10:
-        if Id in users:
-            print("this Id ALready Exists")
-            return False
-        else:
-            return True
-
-
-
-def displayMenue_teacher():
-    while True:
-        print("Welcome")
-        print("-"*20)
-        print("[1]. Generate Questions")
-        print("[2]. Show All Studens In Details")
-        print("[3]. Show Statistics")
-        print("[4]. Exit")
-        choice = input("Please Enter What You Want: ")
-        match choice:
-            case "1":
-                subject = input("Enter the subject (e.g. Math, Science): ")
-                grade = input("Enter the grade level (e.g. 5th grade, high school): ")
-                questions = generate_questions(subject, grade)
-
-                print("\nGenerated Questions:\n" + "-"*40)
-                for q in questions:
-                    print(q + "\n")
-            case "2":
-                pass
-            case "3":
-                pass
-            case "4":
-                break
-            case _:
-                print("Wrong input try again!!!")
-
-def generate_questions(subject: str, num_questions: int = 5) -> list:
-    prompt = (
-        f"Generate {num_questions} multiple-choice quiz questions for {subject} "
-        f". Provide 4 options (A, B, C, D) and indicate the correct answer."
-    )
-
-    response =  client.chat.completions.create(
-        model="gpt-4",  # or "gpt-3.5-turbo"
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.7
-    )
-
-    content = response.choices[0].message.content
-    return content.split("\n\n")
+#####################################################################################################
 try:
         while True:
             
@@ -109,58 +57,69 @@ try:
             print("-"*20)
 
             if option == "1":
+               # teacher = Teacher(name, email, Id,password,subject)
                 print("Welcome to Login Page")
                 print("[1]. Login")
-                print("[2]. Register")
+                print("[2]. Register ")
                 login_choice = input("Please Enter What You Want: ")
                 if login_choice == "1":
                     email = input("please enter your email: ")
                     password = input("please enter your password: ")
-                    if check_email(email):
-                        if read_file(email,password):
-                           displayMenue_teacher()
+                    name:str = ""
+                    subject:str = ""
+                    Id = ""
+                    with open("teacher.json", "r", encoding = "UTF-8") as file:
+                        for teacher in teachers:
+                            if teacher['email'] == email :
+                                name = teacher['name']
+                                subject = teacher['subject']
+                    
+                    teacher = Teacher(name, email, Id,password,subject)
+                    if teacher.check_email(email) and teacher.check_password(password):
+                        if read_file_teacher(email,password):
+                           teacher.displayMenue_teacher()
                         else:
-                            print("there is no user in this email")
+                           print("there is no user in this email")
                         
 
                 elif login_choice == "2":
+
                     print("Welcome to register Page")
                     name = input("please enter your name: ")
                     email = input ("please enter your email: ")
-                    Id = int(input("please enter your id: "))
+                    Id = input("please enter your id: ")
                     password = input("please enter your password: ")
                     subject = input("please enter your subject: ")
-                    with open("user.json", "r", encoding="UTF-8") as file:
-                        users = json.load(file)
-                        email_exists = False
-                    for user in users:
-                        if user['email'].strip().lower() == email.strip().lower():
-                            email_exists = True
-                            break
-
-                    if email_exists:
-                        print("This email is already registered.")
-                        continue
-
-          
-                    if(check_email(email) and check_password(password)):
-                        teacher = Teacher(name, email, Id, password, subject)
-                        user_dictionary = {
-                        'name' : name, 
-                        'email' : email,
-                        'Id' : Id,
-                        'password' : password, 
-                        'subject' : subject,
-                        }
-                        users.append(user_dictionary)
+                    teacher = Teacher(name,email,Id,password,subject)
+                    teacher.set_name(name)
+                    teacher.set_subject(subject)
+                    exists = False
+                    with open("teacher.json", "r", encoding="UTF-8") as file:
+                        teachers = json.load(file)
+                        for t in teachers :
+                            if t['Id'] == Id :
+                                print("This user is already registerd")
+                                exists = True
+                    
+                        if teacher.check_email(email) and teacher.check_password(password) and teacher.check_Id(Id) :
+                            if not exists:
+                                teacher_dictionary = {
+                                'name' : name, 
+                                'email' : email,
+                                'Id' : Id,
+                                'password' : password, 
+                                'subject' : subject,
+                                }
+                                teachers.append(teacher_dictionary)
+                                write_file_teacher(teachers)
+                                teacher.displayMenue_teacher()
                         
-                        write_file(users)
-                        displayMenue_teacher()
-                    else:
-                        print("wrong validation")
                    
                 else:
                     print("Wrong input try again!!!")
+                    
+
+#####################################################################################################
 
             elif option == "2":
                 print("Welcome to Login Page")
@@ -168,41 +127,50 @@ try:
                 print("[2]. Register")
                 login_choice = input("Please Enter What You Want: ")
                 if login_choice == "1":
+                    name:str = ""
+                    subject:str = ""
+                    Id = ""
                     email = input("please enter your email: ")
                     password = input("please enter your password: ")
-                    if check_email(email):
-                        if read_file(email,password):
-                           displayMenue_teacher()
+                    student = Student(name, email, Id,password)
+                    if student.check_email(email) and student.check_password(password):
+                        if read_file_student(email,password):
+                           student.displayMenue_students()
                         else:
-                            print("there is no user in this email")
-                        
-
+                           print("there is no user in this email")
+                           
                 elif login_choice == "2":
                     print("Welcome to register Page")
                     name = input("please enter your name: ")
                     email = input ("please enter your email: ")
-                    Id = int(input("please enter your id: "))
+                    Id = input("please enter your id: ")
                     password = input("please enter your password: ")  
-                print("Welcome")
-                print("-"*20)
-                print("[1]. Take a Quiz")
-                print("[2]. Display Your Total Score")
-                print("[3]. Show Statistics")
-                print("[4]. Exit")
-                choice = input("Please Enter What You Want: ")
-                match choice:
-                    case "1":
-                        pass
-                    case "2":
-                        pass
-                    case "3":
-                        pass
-                    case "4":
-                        break
-                    case _:
-                        print("Wrong input try again!!!")
-                
-                break
+                    student = Student(name,email,Id,password)
+                    student.set_name(name)
+                    with open("student.json", "r", encoding="UTF-8") as file:
+                        students = json.load(file)
+                        email_exists = False
+                    for s in students:
+                        if s['email'].lower() == email.lower():
+                            print("This user is already registerd")
+                            email_exists = True
+
+                    if student.check_email(email) and student.check_password(password) and student.check_Id(Id) :
+                            if not email_exists:
+                                student_dictionary = {
+                                'name' : name, 
+                                'email' : email,
+                                'Id' : Id,
+                                'password' : password, 
+                                'score': 0
+                                }
+                                students.append(student_dictionary)
+                                write_file_student(students)
+                                student.displayMenue_students()        
+                   
+                else:
+                    print("Wrong input try again!!!")
+                    
             elif option == "3":
                 break
             else:
