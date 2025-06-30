@@ -4,6 +4,13 @@
     "email": "layan@gmail.com",
     "Id": "1122334455",
     "password": "1234567890",
-    "score": 0
+    "score": 1
+  },
+  {
+    "name": "nouf",
+    "email": "nouf@gmail.com",
+    "Id": "1357901234",
+    "password": "1234567890",
+    "score": 2
   }
 ]

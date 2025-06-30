@@ -2,6 +2,8 @@ from Users.user import User
 from  openai import OpenAI
 import os 
 import json
+import secrets
+import string 
 from dotenv import load_dotenv
 load_dotenv()
 client = OpenAI(api_key= os.getenv("OPENAI_API_KEY"))
@@ -18,46 +20,84 @@ class Teacher(User) :
     def get_subject(self):
         return self.__subject
     
-    def generate_questions(self,subject:str, num_questions:int) -> list:
+    def generate_code(self, length=32):
+        letters = string.ascii_letters + string.digits
+        session_code = ''.join(secrets.choice(letters) for i in range(length))
+        return session_code
+    
+    def generate_questions(self,code:str, subject:str, num_questions:int) -> list:
         generated_questions = []
         question_dictionary = {}
         prompt = (
             f"Generate {num_questions} multiple-choice quiz questions for {subject} "
-            f". Provide 4 options (A, B, C, D) and indicate the correct answer."
-        )
+            f"Return the result in valid JSON format, with each question as an object with keys: "
+            f"'question', 'options', and 'answer'.\n"
+            f"'options' must be a dictionary with keys A, B, C, D.\n"
+            f"Only return the JSON array."
+           )
 
         response =  client.chat.completions.create(
-            model="gpt-4",  # or "gpt-3.5-turbo"
+            model="gpt-4", 
             messages=[{"role": "user", "content": prompt}],
             temperature=0.7
         )
-        content = response.choices[0].message.content
-        questions = content.strip().split("\n\n")
-        for question in questions:
-            question_line = question.strip().split("\n")
-            if len(question_line) < 6:
-                 continue 
-            thequestion = question_line[0].strip()
-            options = {
-                "A": question_line[1].strip()[2:].strip(),
-                "B": question_line[2].strip()[2:].strip(),
-                "C": question_line[3].strip()[2:].strip(),
-                "D": question_line[4].strip()[2:].strip(),
-            }
-            answer = question_line[5].strip().split("Answer:")[-1].strip()
-            question_dictionary = {
-                'question' : thequestion,
-                'options': options,
-                'answer' : answer
-            }
-            generated_questions.append(question_dictionary)
+        content = response.choices[0].message.content.strip()
+        generated_questions = json.loads(content)
+        for each in generated_questions:
+            each['failed_by'] = []
+            each['success_by'] = []
+            
+        question_dictionary = {
+            'Quiz_code': code,
+            'subject':subject,
+            'done_by':self.get_email(),
+            'question' : generated_questions,
+        }
+        with open("question.json", "r" ,encoding= "UTF-8") as file:
+             question_file = json.load(file)
+
+
+        question_file.append(question_dictionary)
         with open("question.json", "w" ,encoding= "UTF-8") as file:
-             content = json.dumps(generated_questions, indent=2)
+             content = json.dumps(question_file, indent=2)
              file.write(content)
 
         return generated_questions
     
+    def students_details(self):
+        try:
+            with open("student.json", "r", encoding="UTF-8") as file:
+                students = json.load(file)
 
+            print("\n📋 All Student Details:")
+            print("-" * 40)
+            for student in students:
+                print(f"Name: {student['name']}")
+                print(f"Score: {student['score']}")
+                print("-" * 40)
+        except Exception as e:
+           print("e")
+    
+    def display_statistics(self):
+        code = input("please enter the quiz code: ")
+        with open("question.json", "r", encoding="UTF-8") as file:
+                exams = json.load(file)
+        flag = None
+        for quiz in exams:
+            if code == quiz['Quiz_code']:
+                flag = quiz['question']
+               # flag = quiz
+                break
+        if not flag: 
+            print("there is no quiz with this code!!")   
+            return
+        for i, question in enumerate(flag, 1):
+            print(f"{i}. {question['question']} ")
+            print(f"Answer. {question['answer']}")
+            print(f"This question success by {len(question['success_by'])} students ->: {question['success_by']}")
+            print(f"This question failed by {len(question['failed_by'])} students ->: {question['failed_by']}")
+
+    
     def displayMenue_teacher(self):
         while True:
             print("Welcome")
@@ -71,8 +111,9 @@ class Teacher(User) :
                 case "1":
                     subject = input("Enter the subject: ")
                     num_question = int(input("Enter number of questions: "))
-                    questions = self.generate_questions(subject,num_question)
-
+                    code = self.generate_code(6)
+                    print(f"Quiz Code is: {code} ")
+                    questions = self.generate_questions(code,subject,num_question)
                     print("\nGenerated Questions:\n" + "-"*40)
                     for q in questions:
                         print(f"Q: {q['question']}")
@@ -81,9 +122,9 @@ class Teacher(User) :
                         print(f"Answer: {q['answer']}")
                         print("-" * 40)
                 case "2":
-                    pass
+                    self.students_details()
                 case "3":
-                    pass
+                    self.display_statistics()
                 case "4":
                     break
                 case _:
