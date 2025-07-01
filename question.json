@@ -1,67 +1,88 @@
 [
   {
-    "Quiz_code": "IRrphu",
+    "Quiz_code": "kEcvUB",
     "subject": "python",
     "done_by": "wasan@gmail.com",
     "question": [
       {
-        "question": "What is the correct way to define a function in Python?",
+        "question": "What is the output of print(str[0]) if str = 'Hello World'?",
         "options": {
-          "A": "def functionName():",
-          "B": "functionName(){}",
-          "C": "function functionName()",
-          "D": "functionName():"
+          "A": "H",
+          "B": "e",
+          "C": "Hello",
+          "D": "World"
         },
         "answer": "A",
         "failed_by": [
-          "nouf"
+          "sara"
         ],
         "success_by": [
-          "layan"
+          "layan",
+          "yara"
+        ]
+      },
+      {
+        "question": "What does the 'split()' function in Python do?",
+        "options": {
+          "A": "It splits a string into a list where each word is a list item",
+          "B": "It splits a list into multiple lists",
+          "C": "It splits a string into separate characters",
+          "D": "It splits an integer into individual digits"
+        },
+        "answer": "A",
+        "failed_by": [],
+        "success_by": [
+          "layan",
+          "sara",
+          "yara"
+        ]
+      },
+      {
+        "question": "What keyword is used to define a function in Python?",
+        "options": {
+          "A": "func",
+          "B": "define",
+          "C": "def",
+          "D": "function"
+        },
+        "answer": "C",
+        "failed_by": [],
+        "success_by": [
+          "layan",
+          "sara",
+          "yara"
         ]
       }
     ]
   },
   {
-    "Quiz_code": "8gdtjx",
-    "subject": "java",
-    "done_by": "wasan@gmail.com",
+    "Quiz_code": "QsCz6H",
+    "subject": "Java",
+    "done_by": "reem@gmail.com",
     "question": [
       {
-        "question": "What is the correct way to declare a variable in Java?",
+        "question": "What does the 'return' keyword do in Java?",
         "options": {
-          "A": "int x = 10",
-          "B": "var x: 10",
-          "C": "x = int(10)",
-          "D": "10 = x"
+          "A": "It stops the execution of the current method and returns control to the caller.",
+          "B": "It initializes a new variable.",
+          "C": "It imports a class or a package.",
+          "D": "It creates a loop."
         },
         "answer": "A",
-        "failed_by": [
-          "layan",
-          "nouf"
-        ],
-        "success_by": [
-          "nouf",
-          "nouf"
-        ]
+        "failed_by": [],
+        "success_by": []
       },
       {
-        "question": "What is the main method in Java?",
+        "question": "What data type does the length() method return in Java?",
         "options": {
-          "A": "public main()",
-          "B": "public int main()",
-          "C": "public static void main(String[] args)",
-          "D": "main public static void(String[] args)"
+          "A": "int",
+          "B": "String",
+          "C": "boolean",
+          "D": "float"
         },
-        "answer": "C",
-        "failed_by": [
-          "layan",
-          "nouf"
-        ],
-        "success_by": [
-          "nouf",
-          "nouf"
-        ]
+        "answer": "A",
+        "failed_by": [],
+        "success_by": []
       }
     ]
   }
